@@ -6,15 +6,11 @@ public class RatingResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @OneToOne
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
-
     private Double finalRating;
-
     private String ratingCategory;
-
     private LocalDateTime ratedAt;
 
     @PrePersist
@@ -51,7 +47,6 @@ public class RatingResult {
     public void setProperty(Property property) {
         this.property = property;
     }
-
     public void setFinalRating(Double finalRating) {
         this.finalRating = finalRating;
     }
