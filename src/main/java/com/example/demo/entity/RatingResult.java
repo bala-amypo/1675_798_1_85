@@ -55,7 +55,6 @@ public class RatingResult {
     public void setFinalRating(Double finalRating) {
         this.finalRating = finalRating;
     }
-
     public void setRatingCategory(String ratingCategory) {
         this.ratingCategory = ratingCategory;
     }
