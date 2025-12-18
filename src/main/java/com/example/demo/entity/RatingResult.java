@@ -12,7 +12,6 @@ public class RatingResult {
     private Double finalRating;
     private String ratingCategory;
     private LocalDateTime ratedAt;
-
     @PrePersist
     public void onCreate() {
         this.ratedAt = LocalDateTime.now();
