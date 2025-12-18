@@ -52,6 +52,9 @@ public class FacilityScore {
     public void setId(Long id) {
         this.id = id;
     }
+
+
+    
     public void setProperty(Property property) {
         this.property = property;
     }
