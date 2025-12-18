@@ -1,32 +1,24 @@
 package com.example.demo.entity;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-
 @Entity
 public class FacilityScore {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    private Long id
     @OneToOne
     @JoinColumn(name = "property_id", nullable = false, unique = true)
     private Property property;
-
     @Min(0)
     @Max(10)
     private Integer schoolProximity;
-
     @Min(0)
     @Max(10)
     private Integer hospitalProximity;
-
     @Min(0)
     @Max(10)
     private Integer transportAccess;
-
     @Min(0)
     @Max(10)
     private Integer safetyScore;
@@ -52,9 +44,6 @@ public class FacilityScore {
     public void setId(Long id) {
         this.id = id;
     }
-
-
-    
     public void setProperty(Property property) {
         this.property = property;
     }
