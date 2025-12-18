@@ -8,11 +8,8 @@ public class Property {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
-
     private String address;
-
     private String city;
-
     @Min(value = 1, message = "Price must be greater than 0")
     private Double price;
 
