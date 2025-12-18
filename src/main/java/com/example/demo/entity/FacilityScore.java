@@ -22,7 +22,6 @@ public class FacilityScore {
     @Min(0)
     @Max(10)
     private Integer safetyScore;
-
     public FacilityScore() {}
     public Long getId() {
         return id;
