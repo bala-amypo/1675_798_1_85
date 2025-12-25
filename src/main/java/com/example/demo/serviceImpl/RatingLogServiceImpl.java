@@ -1,4 +1,4 @@
-package com.example.demo.serviceImpl;
+package com.example.demo.service.impl;
 
 import com.example.demo.entity.Property;
 import com.example.demo.entity.RatingLog;
@@ -26,20 +26,14 @@ public class RatingLogServiceImpl implements RatingLogService {
     public RatingLog addLog(Long propertyId, String message) {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Property not found"));
-
         RatingLog log = new RatingLog();
         log.setProperty(property);
         log.setMessage(message);
-
         return logRepository.save(log);
     }
 
     @Override
     public List<RatingLog> getLogsByProperty(Long propertyId) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found"));
-
-        return logRepository.findByProperty(property);
+        return logRepository.findByPropertyId(propertyId);
     }
 }
-

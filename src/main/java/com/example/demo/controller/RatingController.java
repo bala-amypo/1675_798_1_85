@@ -20,7 +20,7 @@ public class RatingController {
     }
 
     @GetMapping("/property/{propertyId}")
-    public RatingResult get(@PathVariable Long propertyId) {
+    public RatingResult getRating(@PathVariable Long propertyId) {
         return ratingService.getRating(propertyId);
     }
 }

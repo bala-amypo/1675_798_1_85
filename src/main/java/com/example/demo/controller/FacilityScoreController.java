@@ -8,21 +8,20 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/scores")
 public class FacilityScoreController {
 
-    private final FacilityScoreService service;
+    private final FacilityScoreService facilityScoreService;
 
-    public FacilityScoreController(FacilityScoreService service) {
-        this.service = service;
+    public FacilityScoreController(FacilityScoreService facilityScoreService) {
+        this.facilityScoreService = facilityScoreService;
     }
 
     @PostMapping("/{propertyId}")
-    public FacilityScore addScore(
-            @PathVariable Long propertyId,
-            @RequestBody FacilityScore score) {
-        return service.addScore(propertyId, score);
+    public FacilityScore addScore(@PathVariable Long propertyId,
+                                  @RequestBody FacilityScore score) {
+        return facilityScoreService.addScore(propertyId, score);
     }
 
     @GetMapping("/{propertyId}")
     public FacilityScore getScore(@PathVariable Long propertyId) {
-        return service.getScoreByProperty(propertyId);
+        return facilityScoreService.getScoreByProperty(propertyId);
     }
 }

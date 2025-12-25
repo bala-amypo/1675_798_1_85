@@ -22,7 +22,7 @@ public class PropertyController {
     }
 
     @GetMapping
-    public List<Property> getAll() {
+    public List<Property> getAllProperties() {
         return propertyService.getAllProperties();
     }
 }
