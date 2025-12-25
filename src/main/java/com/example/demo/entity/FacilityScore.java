@@ -1,15 +1,13 @@
 package com.example.demo.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = "property_id")
+})
 public class FacilityScore {
 
     @Id
@@ -17,27 +15,20 @@ public class FacilityScore {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "property_id", nullable = false, unique = true)
+    @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
-    @Min(0)
-    @Max(10)
+    @Min(0) @Max(10)
     private Integer schoolProximity;
 
-    @Min(0)
-    @Max(10)
+    @Min(0) @Max(10)
     private Integer hospitalProximity;
 
-    @Min(0)
-    @Max(10)
+    @Min(0) @Max(10)
     private Integer transportAccess;
 
-    @Min(0)
-    @Max(10)
+    @Min(0) @Max(10)
     private Integer safetyScore;
-
-    public FacilityScore() {
-    }
 
     public Long getId() {
         return id;
@@ -45,22 +36,6 @@ public class FacilityScore {
 
     public Property getProperty() {
         return property;
-    }
-
-    public Integer getSchoolProximity() {
-        return schoolProximity;
-    }
-
-    public Integer getHospitalProximity() {
-        return hospitalProximity;
-    }
-
-    public Integer getTransportAccess() {
-        return transportAccess;
-    }
-
-    public Integer getSafetyScore() {
-        return safetyScore;
     }
 
     public void setId(Long id) {
@@ -71,16 +46,32 @@ public class FacilityScore {
         this.property = property;
     }
 
+    public Integer getSchoolProximity() {
+        return schoolProximity;
+    }
+
     public void setSchoolProximity(Integer schoolProximity) {
         this.schoolProximity = schoolProximity;
+    }
+
+    public Integer getHospitalProximity() {
+        return hospitalProximity;
     }
 
     public void setHospitalProximity(Integer hospitalProximity) {
         this.hospitalProximity = hospitalProximity;
     }
 
+    public Integer getTransportAccess() {
+        return transportAccess;
+    }
+
     public void setTransportAccess(Integer transportAccess) {
         this.transportAccess = transportAccess;
+    }
+
+    public Integer getSafetyScore() {
+        return safetyScore;
     }
 
     public void setSafetyScore(Integer safetyScore) {
