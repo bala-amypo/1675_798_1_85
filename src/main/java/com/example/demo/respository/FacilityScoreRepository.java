@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface FacilityScoreRepository extends JpaRepository<FacilityScore, Long> {
 
     Optional<FacilityScore> findByProperty(Property property);
+
+    Optional<FacilityScore> findByPropertyId(Long propertyId);
 }

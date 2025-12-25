@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface RatingResultRepository extends JpaRepository<RatingResult, Long> {
 
     Optional<RatingResult> findByProperty(Property property);
+
+    Optional<RatingResult> findByPropertyId(Long propertyId);
 }
