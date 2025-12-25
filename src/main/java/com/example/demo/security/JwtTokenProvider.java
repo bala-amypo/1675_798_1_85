@@ -27,7 +27,6 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // 🔥 REQUIRED BY TEST
     public Long getUserIdFromToken(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(JWT_SECRET)
