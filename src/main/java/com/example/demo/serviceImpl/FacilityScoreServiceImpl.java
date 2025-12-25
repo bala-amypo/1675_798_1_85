@@ -1,4 +1,4 @@
-package com.example.demo.serviceImpl;
+package com.example.demo.service.impl;
 
 import com.example.demo.entity.FacilityScore;
 import com.example.demo.entity.Property;
@@ -24,17 +24,13 @@ public class FacilityScoreServiceImpl implements FacilityScoreService {
     public FacilityScore addScore(Long propertyId, FacilityScore score) {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Property not found"));
-
         score.setProperty(property);
         return scoreRepository.save(score);
     }
 
     @Override
     public FacilityScore getScoreByProperty(Long propertyId) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found"));
-
-        return scoreRepository.findByProperty(property)
+        return scoreRepository.findByPropertyId(propertyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Score not found"));
     }
 }
