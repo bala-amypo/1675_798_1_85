@@ -1,67 +1,44 @@
-package com.example.demo.controller;
+package com.example.demo.security;
 
-import com.example.demo.dto.LoginRequest;
-import com.example.demo.dto.RegisterRequest;
 import com.example.demo.entity.User;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.security.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import java.util.Date;
 
-@RestController
-@RequestMapping("/auth")
-public class AuthController {
+@Component
+public class JwtTokenProvider {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final String jwtSecret = "secretKey123456";
+    private final long jwtExpirationMs = 86400000;
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    public String generateToken(Authentication authentication, User user) {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-
-        User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setRole(request.getRole());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        userRepository.save(user);
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(), request.getPassword())
-        );
-
-        String token = jwtTokenProvider.generateToken(authentication, user);
-        return new ResponseEntity<>(Map.of("token", token), HttpStatus.CREATED);
+        return Jwts.builder()
+                .setSubject(user.getEmail())
+                .claim("role", user.getRole())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .signWith(SignatureAlgorithm.HS256, jwtSecret)
+                .compact();
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public String getEmailFromToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(jwtSecret)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(), request.getPassword())
-        );
-
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
-        String token = jwtTokenProvider.generateToken(authentication, user);
-
-        return ResponseEntity.ok(Map.of("token", token));
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
