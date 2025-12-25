@@ -1,53 +1,67 @@
-package com.example.demo.security;
+package com.example.demo.controller;
 
+import com.example.demo.dto.LoginRequest;
+import com.example.demo.dto.RegisterRequest;
 import com.example.demo.entity.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.security.JwtTokenProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
+import java.util.Map;
 
-@Component
-public class JwtTokenProvider {
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
 
-    private final String jwtSecret = "secret-key-demo";
-    private final long jwtExpirationMs = 86400000;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-    public String generateToken(Authentication authentication, User user) {
-        return Jwts.builder()
-                .setSubject(user.getEmail())
-                .claim("userId", user.getId())
-                .claim("role", user.getRole())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(SignatureAlgorithm.HS256, jwtSecret)
-                .compact();
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setRole(request.getRole());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(), request.getPassword())
+        );
+
+        String token = jwtTokenProvider.generateToken(authentication, user);
+        return new ResponseEntity<>(Map.of("token", token), HttpStatus.CREATED);
     }
 
-    public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.get("userId", Long.class);
-    }
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
-    public String getEmailFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject();
-    }
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(), request.getPassword())
+        );
 
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+        String token = jwtTokenProvider.generateToken(authentication, user);
+
+        return ResponseEntity.ok(Map.of("token", token));
     }
 }
