@@ -10,21 +10,20 @@ import java.util.List;
 @RequestMapping("/logs")
 public class RatingLogController {
 
-    private final RatingLogService service;
+    private final RatingLogService ratingLogService;
 
-    public RatingLogController(RatingLogService service) {
-        this.service = service;
+    public RatingLogController(RatingLogService ratingLogService) {
+        this.ratingLogService = ratingLogService;
     }
 
     @PostMapping("/{propertyId}")
-    public RatingLog addLog(
-            @PathVariable Long propertyId,
-            @RequestParam String message) {
-        return service.addLog(propertyId, message);
+    public RatingLog addLog(@PathVariable Long propertyId,
+                            @RequestParam String message) {
+        return ratingLogService.addLog(propertyId, message);
     }
 
     @GetMapping("/property/{propertyId}")
     public List<RatingLog> getLogs(@PathVariable Long propertyId) {
-        return service.getLogsByProperty(propertyId);
+        return ratingLogService.getLogsByProperty(propertyId);
     }
 }
