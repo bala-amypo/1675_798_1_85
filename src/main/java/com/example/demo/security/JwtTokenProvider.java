@@ -1,28 +1,27 @@
 package com.example.demo.security;
 
 import com.example.demo.entity.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
-    private String secret = "yourSecretKey";
-    private long validityInMilliseconds = 3600000; // 1 hour
 
-    public String generateToken(org.springframework.security.core.Authentication authentication, User user) {
+    private final String secret = "verySecretKeyChangeMe";
+    private final long validityInMs = 3600000L;
+
+    public String generateToken(org.springframework.security.core.Authentication auth, User user) {
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        Date expiry = new Date(now.getTime() + validityInMs);
 
         return Jwts.builder()
-                .setSubject(authentication.getName())
+                .setSubject(auth.getName())
                 .claim("userId", user.getId())
                 .claim("role", user.getRole())
                 .setIssuedAt(now)
-                .setExpiration(validity)
+                .setExpiration(expiry)
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
@@ -31,18 +30,18 @@ public class JwtTokenProvider {
         try {
             Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
             return true;
-        } catch (Exception e) {
+        } catch (JwtException | IllegalArgumentException ex) {
             return false;
         }
     }
 
     public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-        return claims.getSubject();
+        Claims c = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        return c.getSubject();
     }
 
     public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-        return claims.get("userId", Long.class);
+        Claims c = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        return c.get("userId", Long.class);
     }
 }
