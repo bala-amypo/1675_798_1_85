@@ -1,7 +1,8 @@
-package com.example.demo.service;
+package com.example.demo.service.impl;
 
 import com.example.demo.entity.Property;
 import com.example.demo.repository.PropertyRepository;
+import com.example.demo.service.PropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,5 +15,11 @@ public class PropertyServiceImpl implements PropertyService {
     @Override
     public Property addProperty(Property property) {
         return propertyRepository.save(property);
+    }
+
+    @Override
+    public Property findById(Long id) {
+        return propertyRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Property not found"));
     }
 }
