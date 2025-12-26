@@ -1,58 +1,31 @@
-// package com.example.demo.security;
+package com.example.demo.security;
 
-// import com.example.demo.entity.User;
-// import org.springframework.security.core.GrantedAuthority;
-// import org.springframework.security.core.authority.SimpleGrantedAuthority;
-// import org.springframework.security.core.userdetails.UserDetails;
+import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.*;
+import org.springframework.stereotype.Service;
 
-// import java.util.Collection;
-// import java.util.List;
+import java.util.List;
 
-// public class CustomUserDetails implements UserDetails {
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
 
-//     private final User user;
+    private final UserRepository userRepository;
 
-//     public CustomUserDetails(User user) {
-//         this.user = user;
-//     }
+    public CustomUserDetailsService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
-//     public Long getId() {
-//         return user.getId();
-//     }
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User u = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-//     @Override
-//     public Collection<? extends GrantedAuthority> getAuthorities() {
-//         // ROLE_ prefix is required by Spring
-//         return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
-//     }
-
-//     @Override
-//     public String getPassword() {
-//         return user.getPassword();
-//     }
-
-//     @Override
-//     public String getUsername() {
-//         return user.getEmail();
-//     }
-
-//     @Override
-//     public boolean isAccountNonExpired() {
-//         return true;
-//     }
-
-//     @Override
-//     public boolean isAccountNonLocked() {
-//         return true;
-//     }
-
-//     @Override
-//     public boolean isCredentialsNonExpired() {
-//         return true;
-//     }
-
-//     @Override
-//     public boolean isEnabled() {
-//         return true;
-//     }
-// }
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(u.getEmail())
+                .password(u.getPassword())
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + u.getRole())))
+                .build();
+    }
+}
