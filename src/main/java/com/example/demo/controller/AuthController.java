@@ -3,9 +3,11 @@ package com.example.demo.controller;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtTokenProvider;
-import com.example.demo.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,65 +16,63 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Authentication")
 public class AuthController {
-    
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    
-    @Autowired
-    private UserService userService;
-    
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-    
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public AuthController(UserRepository userRepository,
+                          PasswordEncoder passwordEncoder,
+                          AuthenticationManager authenticationManager,
+                          JwtTokenProvider jwtTokenProvider) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    @Operation(summary = "Register new user")
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest req) {
+        if (userRepository.findByEmail(req.getEmail()).isPresent()) {
+            throw new IllegalStateException("Email already in use");
+        }
         User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(request.getRole());
-        
-        user = userService.saveUser(user);
-        
+        user.setName(req.getName());
+        user.setEmail(req.getEmail());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setRole(req.getRole() != null ? req.getRole() : "ANALYST");
+        user = userRepository.save(user);
+
         Authentication auth = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
         );
-        
         String token = jwtTokenProvider.generateToken(auth, user);
-        
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(Map.of("token", token, "user", user));
+
+        Map<String, String> body = new HashMap<>();
+        body.put("token", token);
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
-    
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    @Operation(summary = "Login")
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequest req) {
         Authentication auth = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
         );
-        
-        User user = userService.findByEmail(request.getEmail()).orElseThrow();
+        User user = userRepository.findByEmail(req.getEmail())
+                .orElseThrow(() -> new IllegalStateException("User not found"));
         String token = jwtTokenProvider.generateToken(auth, user);
-        
-        return ResponseEntity.ok(Map.of("token", token, "user", user));
-    }
-    
-    @RequestMapping(value = "/login", method = {RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
-    public ResponseEntity<?> handleUnsupportedMethods() {
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-            .body(Map.of("error", "Method not allowed"));
-    }
-    
-    @PostMapping(value = "/login", consumes = "text/plain")
-    public ResponseEntity<?> handleUnsupportedMediaType() {
-        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-            .body(Map.of("error", "Unsupported media type"));
+        Map<String, String> body = new HashMap<>();
+        body.put("token", token);
+        return ResponseEntity.ok(body);
     }
 }
