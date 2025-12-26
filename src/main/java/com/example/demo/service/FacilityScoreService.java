@@ -1,10 +1,10 @@
-package com.example.demo.service;
+// package com.example.demo.service;
 
-import com.example.demo.entity.FacilityScore;
+// import com.example.demo.entity.FacilityScore;
 
-public interface FacilityScoreService {
+// public interface FacilityScoreService {
 
-    FacilityScore addScore(Long propertyId, FacilityScore score);
+//     FacilityScore addScore(Long propertyId, FacilityScore score);
 
-    FacilityScore getScoreByProperty(Long propertyId);
-}
+//     FacilityScore getScoreByProperty(Long propertyId);
+// }
