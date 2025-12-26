@@ -7,24 +7,28 @@ import jakarta.validation.constraints.Max;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "property_id"))
 public class FacilityScore {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "property_id")
+    @JoinColumn(name = "property_id", unique = true)
     private Property property;
 
     @Min(1) @Max(10)
     private Integer schoolProximity;
+
     @Min(1) @Max(10)
     private Integer hospitalProximity;
+
     @Min(1) @Max(10)
     private Integer transportAccess;
+
     @Min(1) @Max(10)
     private Integer safetyScore;
 
-    // Getters and setters
+    // getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Property getProperty() { return property; }
