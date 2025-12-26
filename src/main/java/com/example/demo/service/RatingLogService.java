@@ -2,24 +2,10 @@ package com.example.demo.service;
 
 import com.example.demo.entity.RatingLog;
 import com.example.demo.entity.Property;
-import com.example.demo.repository.RatingLogRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
-public class RatingLogService {
-
-    @Autowired
-    private RatingLogRepository ratingLogRepository;
-
-    public RatingLog createRatingLog(Property property, RatingLog log) {
-        log.setProperty(property);
-        return ratingLogRepository.save(log);
-    }
-
-    public List<RatingLog> findByProperty(Property property) {
-        return ratingLogRepository.findByProperty(property);
-    }
+public interface RatingLogService {
+    RatingLog createRatingLog(Property property, RatingLog log);
+    List<RatingLog> findByProperty(Property property);
 }

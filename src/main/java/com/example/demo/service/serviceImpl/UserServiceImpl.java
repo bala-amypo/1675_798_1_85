@@ -1,28 +1,36 @@
-// package com.example.demo.service.impl;
+package com.example.demo.service;
 
-// import com.example.demo.entity.User;
-// import com.example.demo.repository.UserRepository;
-// import com.example.demo.service.UserService;
-// import org.springframework.stereotype.Service;
-// import org.springframework.transaction.annotation.Transactional;
+import com.example.demo.dto.RegisterRequest;
+import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
-// @Service
-// @Transactional
-// public class UserServiceImpl implements UserService {
+import java.util.Optional;
 
-//     private final UserRepository userRepository;
+@Service
+public class UserServiceImpl implements UserService {
 
-//     public UserServiceImpl(UserRepository userRepository) {  // constructor DI
-//         this.userRepository = userRepository;
-//     }
+    @Autowired
+    private UserRepository userRepository;
 
-//     @Override
-//     public User register(User user) {
-//         return userRepository.save(user);
-//     }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-//     @Override
-//     public User findByEmail(String email) {
-//         return userRepository.findByEmail(email).orElse(null);
-//     }
-// }
+    @Override
+    public User registerUser(RegisterRequest request) {
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setRole(request.getRole());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        return user.orElse(null);
+    }
+}
