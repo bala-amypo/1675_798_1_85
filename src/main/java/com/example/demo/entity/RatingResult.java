@@ -6,19 +6,22 @@ import java.time.LocalDateTime;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "property_id"))
 public class RatingResult {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "property_id")
+    @JoinColumn(name = "property_id", unique = true)
     private Property property;
 
     private Double finalRating;
     private String ratingCategory;
+
+    @Column(updatable = false)
     private LocalDateTime ratedAt = LocalDateTime.now();
 
-    // Getters and setters
+    // getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Property getProperty() { return property; }

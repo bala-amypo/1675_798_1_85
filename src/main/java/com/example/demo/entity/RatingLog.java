@@ -5,18 +5,21 @@ import java.time.LocalDateTime;
 
 @Entity
 public class RatingLog {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "property_id")
     private Property property;
 
     private String message;
+
+    @Column(updatable = false)
     private LocalDateTime loggedAt = LocalDateTime.now();
 
-    // Getters and setters
+    // getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Property getProperty() { return property; }
