@@ -1,11 +1,9 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Property;
 import com.example.demo.entity.RatingResult;
-import com.example.demo.repository.PropertyRepository;
 import com.example.demo.service.RatingService;
-import com.example.demo.service.RatingResultService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,30 +11,28 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/ratings")
+@Tag(name = "Ratings")
 public class RatingController {
-    
-    @Autowired
-    private PropertyRepository propertyRepository;
-    
-    @Autowired
-    private RatingService ratingService;
-    
-    @Autowired
-    private RatingResultService ratingResultService;
-    
+
+    private final RatingService ratingService;
+
+    public RatingController(RatingService ratingService) {
+        this.ratingService = ratingService;
+    }
+
     @PostMapping("/generate/{propertyId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<RatingResult> generateRating(@PathVariable Long propertyId) {
-        Property property = propertyRepository.findById(propertyId).orElseThrow();
-        RatingResult result = ratingService.generateRating(property);
+    @Operation(summary = "Generate rating for property")
+    public ResponseEntity<RatingResult> generate(@PathVariable Long propertyId) {
+        RatingResult result = ratingService.generateRating(propertyId);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
-    
+
     @GetMapping("/property/{propertyId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('ANALYST')")
+    @PreAuthorize("hasAnyRole('ADMIN','ANALYST')")
+    @Operation(summary = "Get rating for property")
     public ResponseEntity<RatingResult> getRating(@PathVariable Long propertyId) {
-        Property property = propertyRepository.findById(propertyId).orElseThrow();
-        RatingResult result = ratingResultService.findByProperty(property).orElseThrow();
+        RatingResult result = ratingService.getRating(propertyId);
         return ResponseEntity.ok(result);
     }
 }
