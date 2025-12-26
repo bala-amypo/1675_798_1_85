@@ -1,44 +1,45 @@
-// package com.example.demo.exception;
+package com.example.demo.exception;
 
-// import jakarta.persistence.EntityNotFoundException;
-// import jakarta.validation.ConstraintViolationException;
-// import org.springframework.http.HttpStatus;
-// import org.springframework.http.ResponseEntity;
-// import org.springframework.web.bind.MethodArgumentNotValidException;
-// import org.springframework.web.bind.annotation.ExceptionHandler;
-// import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
-// import java.util.HashMap;
-// import java.util.Map;
-
-// @RestControllerAdvice
-// public class GlobalExceptionHandler {
-
-//     @ExceptionHandler(MethodArgumentNotValidException.class)
-//     public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException ex) {
-//         Map<String, String> body = new HashMap<>();
-//         body.put("error", "Validation failed");
-//         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
-//     }
-
-//     @ExceptionHandler(ConstraintViolationException.class)
-//     public ResponseEntity<Map<String, String>> handleConstraint(ConstraintViolationException ex) {
-//         Map<String, String> body = new HashMap<>();
-//         body.put("error", "Validation failed");
-//         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
-//     }
-
-//     @ExceptionHandler(IllegalStateException.class)
-//     public ResponseEntity<Map<String, String>> handleIllegalState(IllegalStateException ex) {
-//         Map<String, String> body = new HashMap<>();
-//         body.put("error", ex.getMessage());
-//         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
-//     }
-
-//     @ExceptionHandler(EntityNotFoundException.class)
-//     public ResponseEntity<Map<String, String>> handleNotFound(EntityNotFoundException ex) {
-//         Map<String, String> body = new HashMap<>();
-//         body.put("error", ex.getMessage());
-//         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-//     }
-// }
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiError> handleBadRequestException(BadRequestException ex, WebRequest request) {
+        ApiError error = new ApiError();
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        error.setError("Bad Request");
+        error.setMessage(ex.getMessage());
+        error.setPath(request.getDescription(false));
+        
+        return ResponseEntity.badRequest().body(error);
+    }
+    
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiError> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
+        ApiError error = new ApiError();
+        error.setStatus(HttpStatus.NOT_FOUND.value());
+        error.setError("Not Found");
+        error.setMessage(ex.getMessage());
+        error.setPath(request.getDescription(false));
+        
+        return ResponseEntity.notFound().build();
+    }
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidationException(MethodArgumentNotValidException ex, WebRequest request) {
+        ApiError error = new ApiError();
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        error.setError("Validation Failed");
+        error.setMessage("Invalid input data");
+        error.setPath(request.getDescription(false));
+        
+        return ResponseEntity.badRequest().body(error);
+    }
+}
