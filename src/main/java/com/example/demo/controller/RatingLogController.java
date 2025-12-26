@@ -1,29 +1,18 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.RatingLog;
-import com.example.demo.service.RatingLogService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/logs")
-public class RatingLogController {
-
-    private final RatingLogService ratingLogService;
-
-    public RatingLogController(RatingLogService ratingLogService) {
-        this.ratingLogService = ratingLogService;
-    }
-
-    @PostMapping("/{propertyId}")
-    public RatingLog addLog(@PathVariable Long propertyId,
-                            @RequestParam String message) {
-        return ratingLogService.addLog(propertyId, message);
-    }
-
-    @GetMapping("/property/{propertyId}")
-    public List<RatingLog> getLogs(@PathVariable Long propertyId) {
-        return ratingLogService.getLogsByProperty(propertyId);
+public class RootController {
+    
+    @GetMapping("/")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ANALYST')")
+    public ResponseEntity<?> root() {
+        return ResponseEntity.ok(Map.of("message", "Welcome to Real Estate Rating Engine"));
     }
 }
