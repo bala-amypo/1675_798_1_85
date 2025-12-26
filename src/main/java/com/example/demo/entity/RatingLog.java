@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "rating_logs")
 public class RatingLog {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,16 +16,25 @@ public class RatingLog {
 
     private String message;
 
-    @Column(updatable = false)
-    private LocalDateTime loggedAt = LocalDateTime.now();
+    @Column(name = "logged_at")
+    private LocalDateTime loggedAt;
 
-    // getters and setters
+    @PrePersist
+    protected void onCreate() {
+        loggedAt = LocalDateTime.now();
+    }
+
+    public RatingLog() {}
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public Property getProperty() { return property; }
     public void setProperty(Property property) { this.property = property; }
+
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
+
     public LocalDateTime getLoggedAt() { return loggedAt; }
     public void setLoggedAt(LocalDateTime loggedAt) { this.loggedAt = loggedAt; }
 }
