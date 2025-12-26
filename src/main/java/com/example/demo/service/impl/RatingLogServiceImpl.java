@@ -1,27 +1,19 @@
-package com.example.demo.service;
+package com.example.demo.service.impl;
 
 import com.example.demo.entity.RatingLog;
-import com.example.demo.entity.Property;
 import com.example.demo.repository.RatingLogRepository;
+import com.example.demo.service.RatingLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class RatingLogServiceImpl implements RatingLogService {
-
+    
     @Autowired
     private RatingLogRepository ratingLogRepository;
-
+    
     @Override
-    public RatingLog createRatingLog(Property property, RatingLog log) {
-        log.setProperty(property);
+    public RatingLog createLog(RatingLog log) {
         return ratingLogRepository.save(log);
-    }
-
-    @Override
-    public List<RatingLog> findByProperty(Property property) {
-        return ratingLogRepository.findByProperty(property);
     }
 }
