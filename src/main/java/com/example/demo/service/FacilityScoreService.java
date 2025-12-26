@@ -1,10 +1,25 @@
-// package com.example.demo.service;
+package com.example.demo.service;
 
-// import com.example.demo.entity.FacilityScore;
+import com.example.demo.entity.FacilityScore;
+import com.example.demo.entity.Property;
+import com.example.demo.repository.FacilityScoreRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-// public interface FacilityScoreService {
+import java.util.Optional;
 
-//     FacilityScore addScore(Long propertyId, FacilityScore score);
+@Service
+public class FacilityScoreService {
 
-//     FacilityScore getScoreByProperty(Long propertyId);
-// }
+    @Autowired
+    private FacilityScoreRepository facilityScoreRepository;
+
+    public FacilityScore createFacilityScore(Property property, FacilityScore score) {
+        score.setProperty(property);
+        return facilityScoreRepository.save(score);
+    }
+
+    public Optional<FacilityScore> findByProperty(Property property) {
+        return facilityScoreRepository.findByProperty(property);
+    }
+}
