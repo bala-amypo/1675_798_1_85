@@ -31,60 +31,37 @@ public class Property {
     @ManyToMany
     private List<User> assignedUsers = new ArrayList<>();
 
-    // getters & setters
+    // 🔴 ADD THIS (tests expect it)
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL)
+    private List<RatingLog> ratingLogs = new ArrayList<>();
 
-    public Long getId() {
-        return id;
+    // 🔴 ADD THIS METHOD (tests expect it)
+    public void addRatingLog(RatingLog log) {
+        ratingLogs.add(log);
+        log.setProperty(this);
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    // getters & setters (KEEP AS IS)
 
-    public String getTitle() {
-        return title;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getAddress() {
-        return address;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 
-    public String getCity() {
-        return city;
-    }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+    public double getAreaSqFt() { return areaSqFt; }
+    public void setAreaSqFt(double areaSqFt) { this.areaSqFt = areaSqFt; }
 
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public double getAreaSqFt() {
-        return areaSqFt;
-    }
-
-    public void setAreaSqFt(double areaSqFt) {
-        this.areaSqFt = areaSqFt;
-    }
-
-    public List<User> getAssignedUsers() {
-        return assignedUsers;
-    }
-
+    public List<User> getAssignedUsers() { return assignedUsers; }
     public void setAssignedUsers(List<User> assignedUsers) {
         this.assignedUsers = assignedUsers;
     }
