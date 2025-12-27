@@ -12,7 +12,7 @@ public class RatingLog {
 
     private String message;
 
-
+  
     private LocalDateTime loggedAt;
 
     @ManyToOne

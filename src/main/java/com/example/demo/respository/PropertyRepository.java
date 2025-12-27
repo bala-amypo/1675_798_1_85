@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface PropertyRepository extends JpaRepository<Property, Long> {
 
+
     List<Property> findByCity(String city);
 
  
