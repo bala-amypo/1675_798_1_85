@@ -1,8 +1,10 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "rating_logs")
 public class RatingLog {
 
     @Id
@@ -11,9 +13,19 @@ public class RatingLog {
 
     private String message;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
+    @Column(updatable = false)
+    private LocalDateTime loggedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.loggedAt = LocalDateTime.now();
+    }
+
+    // Getters & Setters
     public Long getId() { return id; }
 
     public String getMessage() { return message; }
@@ -21,9 +33,7 @@ public class RatingLog {
 
     public Property getProperty() { return property; }
     public void setProperty(Property property) { this.property = property; }
-    
-    // ADD THIS ONE METHOD - test requires it
-    public java.time.LocalDateTime getLoggedAt() { 
-        return java.time.LocalDateTime.now(); 
-    }
+
+    // Required by tests
+    public LocalDateTime getLoggedAt() { return loggedAt; }
 }
