@@ -1,15 +1,10 @@
-package com.example.demo;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.ServletComponentScan;
-
 @SpringBootApplication
 @ServletComponentScan
 public class DemoApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        var context = SpringApplication.run(DemoApplication.class, args);
+        System.out.println("Real Estate Rating Engine started successfully on port: " +
+                context.getEnvironment().getProperty("server.port", "8080"));
+    }
 }
