@@ -1,29 +1,56 @@
-package com.example.demo.controller;
+package com.example.demo.service;
 
 import com.example.demo.entity.FacilityScore;
-import com.example.demo.service.FacilityScoreService;
-import jakarta.validation.Valid;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import com.example.demo.entity.Property;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.repository.FacilityScoreRepository;
+import com.example.demo.repository.PropertyRepository;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
+import org.springframework.stereotype.Service;
 
-@RestController
-@RequestMapping("/scores")
-public class FacilityScoreController {
+import java.util.Optional;
 
-    private final FacilityScoreService service;
+@Service
+public class FacilityScoreService {
 
-    public FacilityScoreController(FacilityScoreService service) {
-        this.service = service;
+    private final FacilityScoreRepository facilityScoreRepository;
+    private final PropertyRepository propertyRepository;
+    private final Validator validator;
+
+    public FacilityScoreService(FacilityScoreRepository facilityScoreRepository,
+                                PropertyRepository propertyRepository,
+                                Validator validator) {
+        this.facilityScoreRepository = facilityScoreRepository;
+        this.propertyRepository = propertyRepository;
+        this.validator = validator;
     }
 
-    @PostMapping("/{propertyId}")
-    public ResponseEntity<?> add(@PathVariable Long propertyId,
-                                 @Valid @RequestBody FacilityScore fs) {
-        return ResponseEntity.status(201).body(service.addScore(propertyId, fs));
+    public FacilityScore addScore(Long propertyId, FacilityScore fs) {
+        Property property = propertyRepository.findById(propertyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Property not found with id: " + propertyId));
+
+        // Check if a score already exists for this property
+        Optional<FacilityScore> existing = facilityScoreRepository.findByProperty(property);
+        if (existing.isPresent()) {
+            throw new ConstraintViolationException("Facility score already exists for this property", null);
+        }
+
+        // Validate score fields (0-10)
+        var violations = validator.validate(fs);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+
+        fs.setProperty(property);
+        return facilityScoreRepository.save(fs);
     }
 
-    @GetMapping("/{propertyId}")
-    public ResponseEntity<?> get(@PathVariable Long propertyId) {
-        return ResponseEntity.ok(service.getScoreByProperty(propertyId));
+    public FacilityScore getScoreByProperty(Long propertyId) {
+        Property property = propertyRepository.findById(propertyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Property not found with id: " + propertyId));
+
+        return facilityScoreRepository.findByProperty(property)
+                .orElseThrow(() -> new ResourceNotFoundException("FacilityScore not found for property id: " + propertyId));
     }
 }
