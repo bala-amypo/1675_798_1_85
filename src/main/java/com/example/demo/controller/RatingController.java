@@ -1,49 +1,29 @@
-package com.example.demo.service;
+package com.example.demo.controller;
 
-import com.example.demo.entity.Property;
-import com.example.demo.entity.RatingLog;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.PropertyRepository;
-import com.example.demo.repository.RatingLogRepository;
-import org.springframework.stereotype.Service;
+import com.example.demo.entity.RatingResult;
+import com.example.demo.service.RatingService;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.List;
+@RestController
+@RequestMapping("/ratings")
+public class RatingController {
 
-@Service
-public class RatingLogService {
+    private final RatingService service;
 
-    private final RatingLogRepository logRepository;
-    private final PropertyRepository propertyRepository;
-
-    public RatingLogService(RatingLogRepository logRepository,
-                            PropertyRepository propertyRepository) {
-        this.logRepository = logRepository;
-        this.propertyRepository = propertyRepository;
+    public RatingController(RatingService service) {
+        this.service = service;
     }
 
-    /**
-     * Add a new log entry for a property
-     */
-    public RatingLog addLog(Long propertyId, String message) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found with id: " + propertyId));
-
-        RatingLog log = new RatingLog();
-        log.setProperty(property);
-        log.setMessage(message);
-        log.setLoggedAt(LocalDateTime.now());
-
-        return logRepository.save(log);
+    @PostMapping("/generate/{propertyId}")
+    public ResponseEntity<RatingResult> generate(@PathVariable Long propertyId) {
+        RatingResult result = service.generateRating(propertyId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
-    /**
-     * Retrieve all logs for a property
-     */
-    public List<RatingLog> getLogsByProperty(Long propertyId) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found with id: " + propertyId));
-
-        return logRepository.findByProperty(property);
+    @GetMapping("/property/{propertyId}")
+    public ResponseEntity<RatingResult> get(@PathVariable Long propertyId) {
+        RatingResult result = service.getRating(propertyId);
+        return ResponseEntity.ok(result);
     }
 }
