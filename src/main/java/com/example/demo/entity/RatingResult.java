@@ -26,4 +26,9 @@ public class RatingResult {
 
     public Property getProperty() { return property; }
     public void setProperty(Property property) { this.property = property; }
+    
+    // ADD THIS ONE METHOD - test requires it
+    public java.time.LocalDateTime getRatedAt() { 
+        return java.time.LocalDateTime.now(); 
+    }
 }

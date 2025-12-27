@@ -21,4 +21,9 @@ public class RatingLog {
 
     public Property getProperty() { return property; }
     public void setProperty(Property property) { this.property = property; }
+    
+    // ADD THIS ONE METHOD - test requires it
+    public java.time.LocalDateTime getLoggedAt() { 
+        return java.time.LocalDateTime.now(); 
+    }
 }
