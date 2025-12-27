@@ -9,10 +9,9 @@ import java.util.List;
 
 public interface PropertyRepository extends JpaRepository<Property, Long> {
 
-    // 🔴 REQUIRED BY TEST
     List<Property> findByCity(String city);
 
-    // 🔴 REQUIRED BY TEST
+ 
     @Query("SELECT p FROM Property p WHERE p.city = :city")
     List<Property> findByCityHql(@Param("city") String city);
 }
