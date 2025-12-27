@@ -1,68 +1,66 @@
-package com.example.demo.controller;
+package com.example.demo.security;
 
-import com.example.demo.dto.AuthResponse;
-import com.example.demo.dto.LoginRequest;
-import com.example.demo.dto.RegisterRequest;
-import com.example.demo.entity.User;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.security.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-@RestController
-@RequestMapping("/auth")
-public class AuthController {
-    
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    
-    @Autowired
-    private JwtTokenProvider tokenProvider;
-    
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.badRequest().body("Email already exists!");
-        }
-        
-        User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(request.getRole());
-        
-        User savedUser = userRepository.save(user);
-        
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
-        
-        String jwt = tokenProvider.generateToken(authentication, savedUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponse(jwt));
+import java.util.Date;
+
+@Component
+public class JwtTokenProvider {
+
+    @Value("${app.jwtSecret:SecretKeyForJWTGeneration}")
+    private String jwtSecret;
+
+    @Value("${app.jwtExpirationMs:86400000}") // 1 day
+    private int jwtExpirationMs;
+
+    // Generate JWT using user info
+    public String generateToken(String email, String role, Long userId) {
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("role", role)
+                .claim("userId", userId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .compact();
     }
-    
-    @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
-        
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        String jwt = tokenProvider.generateToken(authentication, user);
-        
-        return ResponseEntity.ok(new AuthResponse(jwt));
+
+    // Get email from token
+    public String getEmailFromToken(String token) {
+        return Jwts.parser().setSigningKey(jwtSecret)
+                .parseClaimsJws(token).getBody().getSubject();
+    }
+
+    // Get role from token
+    public String getRoleFromToken(String token) {
+        return (String) Jwts.parser().setSigningKey(jwtSecret)
+                .parseClaimsJws(token).getBody().get("role");
+    }
+
+    // Get userId from token
+    public Long getUserIdFromToken(String token) {
+        return ((Number) Jwts.parser().setSigningKey(jwtSecret)
+                .parseClaimsJws(token).getBody().get("userId")).longValue();
+    }
+
+    // Validate token
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+            return true;
+        } catch (SignatureException ex) {
+            System.err.println("Invalid JWT signature");
+        } catch (MalformedJwtException ex) {
+            System.err.println("Invalid JWT token");
+        } catch (ExpiredJwtException ex) {
+            System.err.println("Expired JWT token");
+        } catch (UnsupportedJwtException ex) {
+            System.err.println("Unsupported JWT token");
+        } catch (IllegalArgumentException ex) {
+            System.err.println("JWT claims string is empty");
+        }
+        return false;
     }
 }
