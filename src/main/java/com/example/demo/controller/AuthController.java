@@ -59,7 +59,8 @@ public class AuthController {
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
         
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
         String jwt = tokenProvider.generateToken(authentication, user);
         
         return ResponseEntity.ok(new AuthResponse(jwt));
