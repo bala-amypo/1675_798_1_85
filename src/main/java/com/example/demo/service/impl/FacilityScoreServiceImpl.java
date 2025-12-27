@@ -1,37 +1,36 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.FacilityScore;
-import com.example.demo.entity.Property;
-import com.example.demo.repository.FacilityScoreRepository;
-import com.example.demo.repository.PropertyRepository;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.FacilityScoreService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class FacilityScoreServiceImpl implements FacilityScoreService {
-    
-    @Autowired
-    private FacilityScoreRepository facilityScoreRepository;
-    
-    @Autowired
-    private PropertyRepository propertyRepository;
-    
-    @Override
-    public FacilityScore createScore(Long propertyId, FacilityScore score) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
-        
-        if (facilityScoreRepository.existsByProperty(property)) {
-            throw new RuntimeException("Facility score already exists for this property");
-        }
-        
-        score.setProperty(property);
-        return facilityScoreRepository.save(score);
+
+    private final FacilityScoreRepository fsRepo;
+    private final PropertyRepository propRepo;
+
+    public FacilityScoreServiceImpl(FacilityScoreRepository fsRepo,
+                                    PropertyRepository propRepo) {
+        this.fsRepo = fsRepo;
+        this.propRepo = propRepo;
     }
-    
+
     @Override
-    public FacilityScore getScoreByProperty(Property property) {
-        return facilityScoreRepository.findByProperty(property).orElse(null);
+    public FacilityScore addScore(Long propertyId, FacilityScore score) {
+        Property p = propRepo.findById(propertyId).orElseThrow();
+
+        if (fsRepo.findByProperty(p).isPresent())
+            throw new RuntimeException("Facility score already exists");
+
+        score.setProperty(p);
+        return fsRepo.save(score);
+    }
+
+    @Override
+    public FacilityScore getScoreByProperty(Long propertyId) {
+        Property p = propRepo.findById(propertyId).orElseThrow();
+        return fsRepo.findByProperty(p).orElseThrow();
     }
 }
