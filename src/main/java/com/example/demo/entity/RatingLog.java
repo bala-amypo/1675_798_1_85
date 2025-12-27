@@ -14,7 +14,7 @@ public class RatingLog {
     @ManyToOne
     private Property property;
 
-    public Long getId() { return `id; }
+    public Long getId() { return id; }
 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
