@@ -20,13 +20,11 @@ public class RatingLogController {
     @PostMapping("/{propertyId}")
     public ResponseEntity<RatingLog> add(@PathVariable Long propertyId,
                                          @RequestBody String message) {
-        RatingLog log = service.addLog(propertyId, message);
-        return ResponseEntity.status(HttpStatus.CREATED).body(log);
+        return ResponseEntity.status(201).body(service.addLog(propertyId, message));
     }
 
     @GetMapping("/property/{propertyId}")
-    public ResponseEntity<List<RatingLog>> get(@PathVariable Long propertyId) {
-        List<RatingLog> logs = service.getLogsByProperty(propertyId);
-        return ResponseEntity.ok(logs);
+    public ResponseEntity<List<RatingLog>> list(@PathVariable Long propertyId) {
+        return ResponseEntity.ok(service.getLogsByProperty(propertyId));
     }
 }
