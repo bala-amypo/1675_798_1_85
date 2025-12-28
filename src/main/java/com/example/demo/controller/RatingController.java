@@ -17,13 +17,11 @@ public class RatingController {
 
     @PostMapping("/generate/{propertyId}")
     public ResponseEntity<RatingResult> generate(@PathVariable Long propertyId) {
-        RatingResult result = service.generateRating(propertyId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        return ResponseEntity.status(201).body(service.generateRating(propertyId));
     }
 
     @GetMapping("/property/{propertyId}")
     public ResponseEntity<RatingResult> get(@PathVariable Long propertyId) {
-        RatingResult result = service.getRating(propertyId);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(service.getRating(propertyId));
     }
 }

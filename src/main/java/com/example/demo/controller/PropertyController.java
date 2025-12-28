@@ -1,36 +1,32 @@
-package com.example.demo.service.impl;
+package com.example.demo.controller;
 
-import com.example.demo.entity.*;
-import com.example.demo.repository.*;
-import com.example.demo.service.RatingLogService;
-import org.springframework.stereotype.Service;
+import com.example.demo.entity.Property;
+import com.example.demo.service.PropertyService;
+import jakarta.validation.Valid;
+import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Service
-public class RatingLogServiceImpl implements RatingLogService {
+@RestController
+@RequestMapping("/properties")
+public class PropertyController {
 
-    private final PropertyRepository propRepo;
-    private final RatingLogRepository logRepo;
+    private final PropertyService service;
 
-    public RatingLogServiceImpl(PropertyRepository propRepo,
-                                RatingLogRepository logRepo) {
-        this.propRepo = propRepo;
-        this.logRepo = logRepo;
+    public PropertyController(PropertyService service) {
+        this.service = service;
     }
 
-    @Override
-    public RatingLog addLog(Long propertyId, String message) {
-        Property p = propRepo.findById(propertyId).orElseThrow();
-        RatingLog log = new RatingLog();
-        log.setProperty(p);
-        log.setMessage(message);
-        return logRepo.save(log);
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping
+    public ResponseEntity<Property> add(@Valid @RequestBody Property p) {
+        return ResponseEntity.status(201).body(service.addProperty(p));
     }
 
-    @Override
-    public List<RatingLog> getLogsByProperty(Long propertyId) {
-        Property p = propRepo.findById(propertyId).orElseThrow();
-        return logRepo.findByProperty(p);
+    @GetMapping
+    public ResponseEntity<List<Property>> list() {
+        return ResponseEntity.ok(service.getAllProperties());
     }
 }

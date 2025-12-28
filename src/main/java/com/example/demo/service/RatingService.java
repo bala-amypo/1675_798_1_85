@@ -1,8 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.entity.FacilityScore;
+import com.example.demo.entity.RatingResult;
 
-public interface FacilityScoreService {
-    FacilityScore addScore(Long propertyId, FacilityScore score);
-    FacilityScore getScoreByProperty(Long propertyId);
+public interface RatingService {
+    RatingResult generateRating(Long propertyId);
+    RatingResult getRating(Long propertyId);
 }

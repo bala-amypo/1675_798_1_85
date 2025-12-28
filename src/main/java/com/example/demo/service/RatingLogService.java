@@ -1,8 +1,9 @@
 package com.example.demo.service;
 
-import com.example.demo.entity.RatingResult;
+import com.example.demo.entity.RatingLog;
+import java.util.List;
 
-public interface RatingService {
-    RatingResult generateRating(Long propertyId);
-    RatingResult getRating(Long propertyId);
+public interface RatingLogService {
+    RatingLog addLog(Long propertyId, String message);
+    List<RatingLog> getLogsByProperty(Long propertyId);
 }

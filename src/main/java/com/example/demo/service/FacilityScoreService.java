@@ -1,9 +1,8 @@
-package com.example.demo.dto;
+package com.example.demo.service;
 
-public class AuthResponse {
-    private String token;
-    public AuthResponse(String token) {
-        this.token = token;
-    }
-    public String getToken() { return token; }
+import com.example.demo.entity.FacilityScore;
+
+public interface FacilityScoreService {
+    FacilityScore addScore(Long propertyId, FacilityScore score);
+    FacilityScore getScoreByProperty(Long propertyId);
 }
