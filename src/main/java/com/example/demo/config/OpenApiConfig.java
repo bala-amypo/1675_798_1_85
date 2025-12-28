@@ -1,26 +1,42 @@
 package com.example.demo.config;
 
-import io.swagger.v3.oas.models.*;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.security.*;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
 
     @Bean
-    public OpenAPI openAPI() {
+    public OpenAPI customOpenAPI() {
+
+        // JWT Security Scheme
+        SecurityScheme securityScheme = new SecurityScheme()
+                .name("Authorization")
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT")
+                .in(SecurityScheme.In.HEADER);
+
+        // Apply JWT globally
+        SecurityRequirement securityRequirement = new SecurityRequirement()
+                .addList("Bearer Authentication");
+
         return new OpenAPI()
-                .info(new Info()
-                        .title("Real Estate Rating Engine API")
-                        .version("1.0"))
-                .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
+                // Server with port number
+                .servers(List.of(
+                        new Server().url("https://9200.pro604cr.amypo.ai/")
+                ))
+                // Swagger Authorize button
                 .components(new Components()
-                        .addSecuritySchemes("BearerAuth",
-                                new SecurityScheme()
-                                        .type(SecurityScheme.Type.HTTP)
-                                        .scheme("bearer")
-                                        .bearerFormat("JWT")));
+                        .addSecuritySchemes("Bearer Authentication", securityScheme)
+                )
+                .addSecurityItem(securityRequirement);
     }
 }
