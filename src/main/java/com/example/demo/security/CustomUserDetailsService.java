@@ -8,28 +8,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserRepository repo;
 
-    public CustomUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public CustomUserDetailsService(UserRepository repo) {
+        this.repo = repo;
     }
 
-    /**
-     * Load a user by email for authentication.
-     * @param email the user's email
-     * @return UserDetails used by Spring Security
-     * @throws UsernameNotFoundException if user not found
-     */
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    public UserDetails loadUserByUsername(String email)
+            throws UsernameNotFoundException {
 
-        // Return Spring Security UserDetails object with role(s)
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
+        User user = repo.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail())
                 .password(user.getPassword())
-                .roles(user.getRole()) // role must be exactly "ADMIN" or "ANALYST"
+                .roles(user.getRole())
                 .build();
     }
 }
