@@ -1,58 +1,63 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.Property;
-import com.example.demo.entity.RatingLog;
-import com.example.demo.exception.BadRequestException;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.PropertyRepository;
-import com.example.demo.repository.RatingLogRepository;
-import com.example.demo.service.RatingLogService;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
+import com.example.demo.service.RatingService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
-public class RatingLogServiceImpl implements RatingLogService {
+public class RatingServiceImpl implements RatingService {
 
-    private final PropertyRepository propertyRepository;
-    private final RatingLogRepository logRepository;
+    private final PropertyRepository propRepo;
+    private final FacilityScoreRepository fsRepo;
+    private final RatingResultRepository rrRepo;
+    private final RatingLogRepository logRepo;
 
-    public RatingLogServiceImpl(PropertyRepository propertyRepository,
-                                RatingLogRepository logRepository) {
-        this.propertyRepository = propertyRepository;
-        this.logRepository = logRepository;
+    public RatingServiceImpl(PropertyRepository propRepo,
+                             FacilityScoreRepository fsRepo,
+                             RatingResultRepository rrRepo,
+                             RatingLogRepository logRepo) {
+        this.propRepo = propRepo;
+        this.fsRepo = fsRepo;
+        this.rrRepo = rrRepo;
+        this.logRepo = logRepo;
     }
 
     @Override
-    public RatingLog addLog(Long propertyId, String message) {
-        if (propertyId == null) {
-            throw new BadRequestException("Property ID cannot be null");
-        }
-        if (message == null || message.trim().isEmpty()) {
-            throw new BadRequestException("Log message cannot be empty");
-        }
+    public RatingResult generateRating(Long propertyId) {
 
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Property not found with ID: " + propertyId));
+        Property p = propRepo.findById(propertyId).orElseThrow();
+        FacilityScore fs = fsRepo.findByProperty(p).orElseThrow();
+
+        double avg = (fs.getSchoolProximity()
+                + fs.getHospitalProximity()
+                + fs.getTransportAccess()
+                + fs.getSafetyScore()) / 4.0;
+
+        String category;
+        if (avg < 4) category = "POOR";
+        else if (avg < 6) category = "AVERAGE";
+        else if (avg < 8) category = "GOOD";
+        else category = "EXCELLENT";
+
+        RatingResult rr = new RatingResult();
+        rr.setProperty(p);
+        rr.setFinalRating(avg);
+        rr.setRatingCategory(category);
+
+        rr = rrRepo.save(rr);
 
         RatingLog log = new RatingLog();
-        log.setProperty(property);
-        log.setMessage(message.trim());
+        log.setProperty(p);
+        log.setMessage("Rating generated: " + category);
+        logRepo.save(log);
 
-        return logRepository.save(log);
+        return rr;
     }
 
     @Override
-    public List<RatingLog> getLogsByProperty(Long propertyId) {
-        if (propertyId == null) {
-            throw new BadRequestException("Property ID cannot be null");
-        }
-
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Property not found with ID: " + propertyId));
-
-        return logRepository.findByProperty(property);
+    public RatingResult getRating(Long propertyId) {
+        Property p = propRepo.findById(propertyId).orElseThrow();
+        return rrRepo.findByProperty(p).orElseThrow();
     }
 }

@@ -1,40 +1,36 @@
-package com.example.demo.controller;
+package com.example.demo.service.impl;
 
-import com.example.demo.entity.Property;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.service.PropertyService;
-import jakarta.validation.Valid;
-import org.springframework.http.*;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
+import com.example.demo.service.RatingLogService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/properties")
-public class PropertyController {
+@Service
+public class RatingLogServiceImpl implements RatingLogService {
 
-    private final PropertyService service;
+    private final PropertyRepository propRepo;
+    private final RatingLogRepository logRepo;
 
-    public PropertyController(PropertyService service) {
-        this.service = service;
+    public RatingLogServiceImpl(PropertyRepository propRepo,
+                                RatingLogRepository logRepo) {
+        this.propRepo = propRepo;
+        this.logRepo = logRepo;
     }
 
-    // Only ADMIN can add properties
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
-    public ResponseEntity<Property> add(@Valid @RequestBody Property property) {
-        Property saved = service.addProperty(property);
-        if (saved == null) {
-            throw new ResourceNotFoundException("Failed to add property");
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    @Override
+    public RatingLog addLog(Long propertyId, String message) {
+        Property p = propRepo.findById(propertyId).orElseThrow();
+        RatingLog log = new RatingLog();
+        log.setProperty(p);
+        log.setMessage(message);
+        return logRepo.save(log);
     }
 
-    // All authenticated users can list properties
-    @GetMapping
-    public ResponseEntity<List<Property>> list() {
-        List<Property> properties = service.getAllProperties();
-        return ResponseEntity.ok(properties);
+    @Override
+    public List<RatingLog> getLogsByProperty(Long propertyId) {
+        Property p = propRepo.findById(propertyId).orElseThrow();
+        return logRepo.findByProperty(p);
     }
 }

@@ -1,56 +1,32 @@
-package com.example.demo.service;
+package com.example.demo.controller;
 
-import com.example.demo.entity.FacilityScore;
 import com.example.demo.entity.Property;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.FacilityScoreRepository;
-import com.example.demo.repository.PropertyRepository;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validator;
-import org.springframework.stereotype.Service;
+import com.example.demo.service.PropertyService;
+import jakarta.validation.Valid;
+import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+import java.util.List;
 
-@Service
-public class FacilityScoreService {
+@RestController
+@RequestMapping("/properties")
+public class PropertyController {
 
-    private final FacilityScoreRepository facilityScoreRepository;
-    private final PropertyRepository propertyRepository;
-    private final Validator validator;
+    private final PropertyService service;
 
-    public FacilityScoreService(FacilityScoreRepository facilityScoreRepository,
-                                PropertyRepository propertyRepository,
-                                Validator validator) {
-        this.facilityScoreRepository = facilityScoreRepository;
-        this.propertyRepository = propertyRepository;
-        this.validator = validator;
+    public PropertyController(PropertyService service) {
+        this.service = service;
     }
 
-    public FacilityScore addScore(Long propertyId, FacilityScore fs) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found with id: " + propertyId));
-
-        // Check if a score already exists for this property
-        Optional<FacilityScore> existing = facilityScoreRepository.findByProperty(property);
-        if (existing.isPresent()) {
-            throw new ConstraintViolationException("Facility score already exists for this property", null);
-        }
-
-        // Validate score fields (0-10)
-        var violations = validator.validate(fs);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
-
-        fs.setProperty(property);
-        return facilityScoreRepository.save(fs);
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping
+    public ResponseEntity<Property> add(@Valid @RequestBody Property p) {
+        return ResponseEntity.status(201).body(service.addProperty(p));
     }
 
-    public FacilityScore getScoreByProperty(Long propertyId) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found with id: " + propertyId));
-
-        return facilityScoreRepository.findByProperty(property)
-                .orElseThrow(() -> new ResourceNotFoundException("FacilityScore not found for property id: " + propertyId));
+    @GetMapping
+    public ResponseEntity<List<Property>> list() {
+        return ResponseEntity.ok(service.getAllProperties());
     }
 }
