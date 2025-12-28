@@ -1,7 +1,7 @@
-package com.example.demo.service;
+// package com.example.demo.service;
 
-import com.example.demo.entity.RatingLog;
+// import com.example.demo.entity.RatingLog;
 
-public interface RatingLogService {
-    RatingLog createLog(RatingLog log);
-}
+// public interface RatingLogService {
+//     RatingLog createLog(RatingLog log);
+// }

@@ -1,8 +1,8 @@
-package com.example.demo.service;
+// package com.example.demo.service;
 
-import com.example.demo.entity.RatingResult;
+// import com.example.demo.entity.RatingResult;
 
-public interface RatingService {
-    RatingResult generateRating(Long propertyId);
-    RatingResult getRatingByPropertyId(Long propertyId);
-}
+// public interface RatingService {
+//     RatingResult generateRating(Long propertyId);
+//     RatingResult getRatingByPropertyId(Long propertyId);
+// }
