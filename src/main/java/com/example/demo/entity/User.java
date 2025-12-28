@@ -9,7 +9,6 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,7 +17,7 @@ public class User {
     private String name;
 
     @Email
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String email;
 
     @NotBlank
@@ -35,7 +34,6 @@ public class User {
 
     public User() {}
 
-    // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
