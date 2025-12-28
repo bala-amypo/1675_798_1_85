@@ -1,35 +1,17 @@
-// package com.example.demo.dto;
+package com.example.demo.dto;
 
-// public class ApiResponse {
+public class ApiResponse {
+    private String message;
+    private boolean success;
 
-//     private String message;
-//     private boolean success;
+    public ApiResponse(String message, boolean success) {
+        this.message = message;
+        this.success = success;
+    }
 
-//     // Default constructor (required by Jackson)
-//     public ApiResponse() {
-//     }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
 
-//     // Constructor for easy creation
-//     public ApiResponse(String message, boolean success) {
-//         this.message = message;
-//         this.success = success;
-//     }
-
-//     // Getter & Setter for message
-//     public String getMessage() {
-//         return message;
-//     }
-
-//     public void setMessage(String message) {
-//         this.message = message;
-//     }
-
-//     // Getter & Setter for success
-//     public boolean isSuccess() {
-//         return success;
-//     }
-
-//     public void setSuccess(boolean success) {
-//         this.success = success;
-//     }
-// }
+    public boolean isSuccess() { return success; }
+    public void setSuccess(boolean success) { this.success = success; }
+}
